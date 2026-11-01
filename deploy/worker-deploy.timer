@@ -1,0 +1,12 @@
+[Unit]
+Description=Comprueba si main ha cambiado (el worker puede haber estado apagado)
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=30min
+# Un portátil suspendido o apagado no cuenta el tiempo: cada hora en punto, y al volver recupera lo que se perdió
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
