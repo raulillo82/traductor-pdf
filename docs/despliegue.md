@@ -10,7 +10,7 @@ móvil ──HTTPS──▶ nginx ──▶ contenedor "traductor-web" ──ssh
 ## Worker (máquina potente)
 
 ```
-podman build -f worker/Dockerfile -t traductor-worker .
+podman build --pull=newer -f worker/Dockerfile -t traductor-worker .
 install -m 755 worker/traductor-ssh ~/.local/bin/traductor-ssh
 ```
 
@@ -91,3 +91,31 @@ el reinicio al siguiente aviso. Estado en `~/.local/state/traductor-deploy/`.
 
 El script se instala **fuera del repositorio** a propósito: un commit no puede cambiarlo; para actualizarlo,
 vuelve a copiarlo a mano. No toca el worker ni `traductor-ssh`.
+
+## Actualización automática del worker
+
+El worker suele ser un portátil: puede estar apagado o en otra red. Por eso **tira** él mismo del repo público
+(la web no puede empujar nada hacia él: su clave SSH solo admite `health` y `translate`), y se pone al día
+cuando vuelve a estar encendido.
+
+```
+git clone https://github.com/raulillo82/traductor-pdf.git ~/.local/share/traductor-worker/repo
+install -m 755 ~/.local/share/traductor-worker/repo/deploy/worker-deploy.sh ~/.local/bin/traductor-worker-deploy.sh
+install -m 644 ~/.local/share/traductor-worker/repo/deploy/worker-deploy.{service,timer} ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now worker-deploy.timer
+```
+
+Reconstruye solo si cambian `worker/`, `translate_pdf*.py`, el glosario o `requirements.txt`. La imagen nueva
+se construye como `candidate` (con `nice`/`ionice`, para no molestar) y se **prueba antes de usarla**: importa
+las dependencias y traduce de punta a punta un PDF generado al momento, sin red. Solo si pasa se etiqueta como
+`latest` (la anterior queda como `previous`, para volver atrás a mano con `podman tag`). Si falla, producción
+no se toca; cada commit se reintenta 3 veces. No borra imágenes ajenas, solo la que deja de ser `previous`.
+
+Igual que en la web, el script se instala fuera del repositorio a propósito. Tampoco instala `traductor-ssh`
+(el comando forzado, la frontera de seguridad de la clave de la web): si el del repo difiere del instalado,
+solo avisa en el log (`journalctl --user -u worker-deploy`); cópialo a mano tras revisarlo.
+
+El glosario vivo (`~/.config/traductor/glosario.txt`) no se toca.
+
+Los builds usan `--pull=newer`: si hay una imagen base más reciente en el registro (parches de seguridad de
+`python:3.13-slim`, por ejemplo), se descarga en vez de reutilizar la copia local, que podría estar vieja.
