@@ -1,0 +1,10 @@
+[tool.ruff.lint]
+# Errores reales e imports ordenados. E501 queda fuera: hay textos y consultas largos
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# TODO: renombrar la variable `l` (E741) en una PR aparte, con los tests, y quitar estas excepciones
+"translate_pdf.py" = ["E741"]
+"translate_pdf_text.py" = ["E741"]
+"worker/traducir.py" = ["E741"]

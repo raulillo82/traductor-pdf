@@ -1,0 +1,26 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    # Siempre una máquina de GitHub: el repositorio es público y un runner propio
+    # ejecutaría el código de cualquier pull request en un servidor del propietario.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      # argostranslate arrastra modelos y PyTorch (varios GB): solo se salta
+      # tests/scripts/test_text_drawings.py, que lo necesita de verdad.
+      - run: grep -v '^argostranslate' requirements.txt > requirements-ci.txt
+      - run: pip install -r requirements-ci.txt -r webapp/requirements.txt -r webapp/requirements-dev.txt ruff==0.17.3
+      - run: ruff check .
+      - run: python -m pytest tests -q -rs
