@@ -10,7 +10,7 @@ móvil ──HTTPS──▶ nginx ──▶ contenedor "traductor-web" ──ssh
 ## Worker (máquina potente)
 
 ```
-podman build -f worker/Containerfile -t traductor-worker .
+podman build -f worker/Dockerfile -t traductor-worker .
 install -m 755 worker/traductor-ssh ~/.local/bin/traductor-ssh
 ```
 
