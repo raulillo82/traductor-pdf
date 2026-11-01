@@ -51,6 +51,12 @@ sys.exit(0 if any(w in text for w in ("punto", "cadena", "cabos", "rellen")) els
 promote_candidate() {
     local new_id old_previous keep
     new_id=$(podman image inspect -f '{{.Id}}' "$IMAGE:candidate") || return 1
+    # Si el build sale idéntico a latest (p. ej. solo cambió un comentario, o el digest ya estaba descargado), no
+    # hay nada que promover: tocar previous la dejaría igual que latest y se perdería la vuelta atrás real.
+    if [ "$new_id" = "$(podman image inspect -f '{{.Id}}' "$IMAGE:latest" 2> /dev/null)" ]; then
+        podman untag "$IMAGE:candidate" "$IMAGE:candidate" || true
+        return 0
+    fi
     old_previous=$(podman image inspect -f '{{.Id}}' "$IMAGE:previous" 2> /dev/null || true)
     podman image exists "$IMAGE:latest" && { podman tag "$IMAGE:latest" "$IMAGE:previous" || return 1; }
     podman tag "$new_id" "$IMAGE:latest" || return 1
