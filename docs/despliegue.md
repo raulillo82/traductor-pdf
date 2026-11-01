@@ -10,7 +10,7 @@ móvil ──HTTPS──▶ nginx ──▶ contenedor "traductor-web" ──ssh
 ## Worker (máquina potente)
 
 ```
-podman build -f worker/Dockerfile -t traductor-worker .
+podman build --pull=newer -f worker/Dockerfile -t traductor-worker .
 install -m 755 worker/traductor-ssh ~/.local/bin/traductor-ssh
 ```
 
@@ -116,3 +116,6 @@ Igual que en la web, el script se instala fuera del repositorio a propósito. Ta
 solo avisa en el log (`journalctl --user -u worker-deploy`); cópialo a mano tras revisarlo.
 
 El glosario vivo (`~/.config/traductor/glosario.txt`) no se toca.
+
+Los builds usan `--pull=newer`: si hay una imagen base más reciente en el registro (parches de seguridad de
+`python:3.13-slim`, por ejemplo), se descarga en vez de reutilizar la copia local, que podría estar vieja.

@@ -86,7 +86,7 @@ fi
 
 if ! git -C "$REPO" diff --quiet "$deployed" "$target" -- "${WATCHED[@]}"; then
     log "construyendo $target, intento $((attempts + 1)) de $MAX_ATTEMPTS"
-    if nice -n 19 ionice -c3 podman build -q -f "$REPO/worker/Dockerfile" -t "$IMAGE:candidate" "$REPO" > /dev/null \
+    if nice -n 19 ionice -c3 podman build -q --pull=newer -f "$REPO/worker/Dockerfile" -t "$IMAGE:candidate" "$REPO" > /dev/null \
             && smoke_test "$IMAGE:candidate"; then
         promote_candidate || { log "FALLO al cambiar las etiquetas: revisa 'podman images'"; exit 1; }
     else

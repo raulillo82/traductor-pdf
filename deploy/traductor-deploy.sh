@@ -49,7 +49,7 @@ print(c.execute("SELECT COUNT(*) FROM jobs WHERE status IN (\"queued\", \"runnin
 # Las etiquetas solo se mueven cuando la imagen nueva se ha construido
 restart_new_version() {
     podman tag "$IMAGE:latest" "$IMAGE:previous" || return 1
-    podman build -q -f "$REPO/webapp/Dockerfile" -t "$IMAGE:latest" "$REPO" || return 1
+    podman build -q --pull=newer -f "$REPO/webapp/Dockerfile" -t "$IMAGE:latest" "$REPO" || return 1
     systemctl --user restart traductor.service && healthy
 }
 
