@@ -8,8 +8,19 @@ from functools import wraps
 from pathlib import Path
 
 from authlib.integrations.flask_client import OAuth
-from flask import (Flask, abort, g, jsonify, redirect, render_template, request, send_file,
-                   send_from_directory, session, url_for)
+from flask import (
+    Flask,
+    abort,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    send_from_directory,
+    session,
+    url_for,
+)
 from flask.sessions import SecureCookieSessionInterface
 from werkzeug.middleware.proxy_fix import ProxyFix
 

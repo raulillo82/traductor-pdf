@@ -5,7 +5,6 @@ import pytest
 from conftest import csrf
 
 from webapp import db
-from webapp.mordor import MordorError
 
 PDF = b"%PDF-1.4 contenido de prueba"
 

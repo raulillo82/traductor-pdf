@@ -26,6 +26,7 @@ from PIL import Image, ImageDraw, ImageFont
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
+
 def _first_existing(*paths):
     return next((p for p in paths if os.path.exists(p)), paths[0])
 
@@ -235,10 +236,11 @@ def _match_case(src, out):
 
 class Translator:
     def __init__(self, src, dst, glossary):
-        import argostranslate.package as pkg
-        import argostranslate.translate as tr
         # Stanza consulta GitHub en cada Pipeline por defecto; los modelos ya son locales.
         import functools
+
+        import argostranslate.package as pkg
+        import argostranslate.translate as tr
         import stanza
         stanza.Pipeline = functools.partial(stanza.Pipeline, download_method=None)
         langs = {l.code for l in tr.get_installed_languages()}

@@ -95,8 +95,8 @@ def test_logout_clears_session(client, login):
 
 
 def test_session_cookie_is_scoped_to_prefix(client, login):
-    r = make_login(client.application)(client, "madre@example.com")
-    r = client.get("/", headers={"X-Forwarded-Prefix": "/traductor"})
+    make_login(client.application)(client, "madre@example.com")
+    client.get("/", headers={"X-Forwarded-Prefix": "/traductor"})
     client.post("/logout", data={"csrf": csrf(client)}, headers={"X-Forwarded-Prefix": "/traductor"})
     cookie = [c for c in client.application.test_client().get(
         "/login", headers={"X-Forwarded-Prefix": "/traductor"}).headers.getlist("Set-Cookie")]
