@@ -71,8 +71,8 @@ def main():
             p.kill()
             fail(4, "La traducción tardó demasiado y se canceló.")
         if p.returncode or not dst.exists():
-            for l in tail:
-                emit("LOG", l)
+            for ln in tail:
+                emit("LOG", ln)
             fail(4, "No se pudo traducir el PDF.")
         emit("PROGRESS", 100)
         sys.stdout.buffer.write(dst.read_bytes())
