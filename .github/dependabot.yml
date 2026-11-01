@@ -18,3 +18,8 @@ updates:
     directory: /worker
     schedule:
       interval: weekly
+    ignore:
+      # onnxruntime (dependencia de argostranslate) no tiene ruedas para Python 3.15: el pip install
+      # del worker no resuelve. Revisar cuando las tenga y subir a mano.
+      - dependency-name: "library/python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
