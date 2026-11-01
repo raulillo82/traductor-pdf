@@ -1,4 +1,4 @@
-FROM docker.io/library/python:3.13-slim
+FROM docker.io/library/python:3.15-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssh-client \
     && rm -rf /var/lib/apt/lists/* \
