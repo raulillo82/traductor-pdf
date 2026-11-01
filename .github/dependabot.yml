@@ -13,11 +13,11 @@ updates:
   - package-ecosystem: docker
     directory: /webapp
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: docker
     directory: /worker
     schedule:
-      interval: weekly
+      interval: monthly
     ignore:
       # onnxruntime (dependencia de argostranslate) no tiene ruedas para Python 3.15: el pip install
       # del worker no resuelve. Revisar cuando las tenga y subir a mano.

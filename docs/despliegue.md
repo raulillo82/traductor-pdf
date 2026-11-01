@@ -10,7 +10,7 @@ móvil ──HTTPS──▶ nginx ──▶ contenedor "traductor-web" ──ssh
 ## Worker (máquina potente)
 
 ```
-podman build --pull=newer -f worker/Dockerfile -t traductor-worker .
+podman build -f worker/Dockerfile -t traductor-worker .
 install -m 755 worker/traductor-ssh ~/.local/bin/traductor-ssh
 ```
 
@@ -117,5 +117,9 @@ solo avisa en el log (`journalctl --user -u worker-deploy`); cópialo a mano tra
 
 El glosario vivo (`~/.config/traductor/glosario.txt`) no se toca.
 
-Los builds usan `--pull=newer`: si hay una imagen base más reciente en el registro (parches de seguridad de
-`python:3.13-slim`, por ejemplo), se descarga en vez de reutilizar la copia local, que podría estar vieja.
+Las imágenes base (`python:*-slim`) se fijan por **digest del índice multiarquitectura** en cada `Dockerfile`
+(`FROM imagen:tag@sha256:…`; el digest de una sola arquitectura rompería o la Pi, que es arm64, o el worker, que es
+amd64). Así lo que corre es exactamente lo que revisó una PR. Dependabot propone el digest nuevo una vez al mes y
+el CI construye las imágenes y las prueba antes de que se pueda fusionar: **fusionar esa PR despliega**, porque los
+temporizadores reconstruyen al cambiar el `Dockerfile`. Un test (`tests/test_dockerfiles.py`) exige el digest.
+Para obtener el del índice: `skopeo inspect --no-tags docker://docker.io/library/python:3.13-slim | jq -r .Digest`.

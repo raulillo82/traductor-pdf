@@ -1,4 +1,6 @@
-FROM docker.io/library/python:3.13-slim
+# Base fijada por digest del ÍNDICE multiarquitectura (no el de una sola arquitectura): así lo que corre es lo
+# que revisó una pull request. Dependabot propone el nuevo digest cada mes. Se construye en amd64 y arm64.
+FROM docker.io/library/python:3.13-slim@sha256:2d44738ebf4ce5f63b9d9ea871e9c7cfdc0426f7b0c97cac915fd88ded1d86bb
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         poppler-utils tesseract-ocr tesseract-ocr-eng fonts-dejavu-core fonts-liberation \
