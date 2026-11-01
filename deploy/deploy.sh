@@ -14,7 +14,7 @@ ssh "$HOST" 'test -f ~/traductor/traductor.env' || { echo "Falta ~/traductor/tra
 
 git archive --format=tar HEAD | ssh "$HOST" 'rm -rf ~/traductor/src/* && tar -x -C ~/traductor/src'
 ssh "$HOST" 'cd ~/traductor/src \
-  && podman build -q -f webapp/Containerfile -t traductor-web . \
+  && podman build -q -f webapp/Dockerfile -t traductor-web . \
   && mkdir -p ~/.config/systemd/user && cp deploy/traductor.service ~/.config/systemd/user/ \
   && systemctl --user daemon-reload && systemctl --user enable traductor \
   && systemctl --user restart traductor'

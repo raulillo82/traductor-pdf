@@ -12,3 +12,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # Dependabot solo reconoce los ficheros llamados Dockerfile (podman los construye igual con -f)
+  - package-ecosystem: docker
+    directory: /webapp
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /worker
+    schedule:
+      interval: weekly
