@@ -24,3 +24,30 @@ jobs:
       - run: pip install -r requirements-ci.txt -r webapp/requirements.txt -r webapp/requirements-dev.txt ruff==0.17.3
       - run: ruff check .
       - run: python -m pytest tests -q -rs
+
+  # Las imágenes se construyen y se prueban en cada PR. Es lo que da sentido a fijar la base por digest:
+  # una PR de Dependabot con un digest nuevo no se puede fusionar si la imagen deja de construirse o de funcionar.
+  web-image:
+    name: web-image (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # amd64 es el CI de siempre; arm64 es la arquitectura de la Raspberry Pi donde corre la web
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -f webapp/Dockerfile -t traductor-web .
+      # Los tests de la web se ejecutan con el Python y las dependencias de la imagen de producción (3.15)
+      - run: >
+          docker run --rm -v "$PWD:/src:ro" -w /src --entrypoint sh traductor-web -c
+          'python --version && pip install -q --user -r webapp/requirements-dev.txt && python -m pytest tests/web -q -p no:cacheprovider'
+
+  worker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # La imagen pesa unos 7 GB; se libera espacio de paquetes del runner que no usamos
+      - run: sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+      - run: docker build -f worker/Dockerfile -t traductor-worker .
+      - run: RUNTIME=docker worker/smoke_test.sh traductor-worker

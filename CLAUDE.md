@@ -28,8 +28,12 @@ glosario con `cv2` y `pymupdf` instalados, o se saltarán en silencio.
 - `main` está protegida: **nada de push directo**. Rama + PR, con el check `tests` en verde. Squash merge por defecto.
 - Commits firmados con GPG. Autor/committer: `17827278+raulillo82@users.noreply.github.com`, no el Gmail.
 - Añade tests para lo que cambies cuando tenga sentido.
-- Dependabot abre PR semanales (pip, docker, github-actions). Las subidas mayores (Python, PyMuPDF, Pillow) se
-  prueban con una traducción real antes de fusionar: el CI no construye las imágenes ni traduce PDFs de verdad.
+- Dependabot abre PR semanales para pip y github-actions, y **mensuales para las imágenes base**. Las bases de los
+  `Dockerfile` van fijadas por **digest del índice multiarquitectura** (`FROM imagen:tag@sha256:…`, nunca el de una sola
+  arquitectura: la web corre en arm64 y el worker en amd64). **Fusionar una PR que toca un `Dockerfile` o
+  `requirements*.txt` despliega**: los temporizadores de la Pi y de mordor reconstruyen. Por eso el CI construye las
+  imágenes y las prueba (la web en amd64 y arm64, el worker con `worker/smoke_test.sh`). Las subidas mayores (Python,
+  PyMuPDF, Pillow) se prueban además con una traducción real.
 
 ## Cosas a tener en cuenta
 
