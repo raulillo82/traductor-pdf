@@ -1,0 +1,6 @@
+[Unit]
+Description=Despliega la web del traductor si main ha cambiado
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/traductor-deploy.sh
