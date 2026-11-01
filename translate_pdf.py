@@ -108,8 +108,8 @@ def ocr_page(args):
         lines = {}
         for i in idxs:
             lines.setdefault(d["line_num"][i], []).append(i)
-        text = " ".join(" ".join(d["text"][i].strip() for i in sorted(l, key=lambda i: d["left"][i]))
-                        for _, l in sorted(lines.items()))
+        text = " ".join(" ".join(d["text"][i].strip() for i in sorted(ln, key=lambda i: d["left"][i]))
+                        for _, ln in sorted(lines.items()))
         letters = sum(c.isalpha() for c in text)
         digits = sum(c.isdigit() for c in text)
         if letters < 3 and not (digits and letters):
@@ -243,7 +243,7 @@ class Translator:
         import argostranslate.translate as tr
         import stanza
         stanza.Pipeline = functools.partial(stanza.Pipeline, download_method=None)
-        langs = {l.code for l in tr.get_installed_languages()}
+        langs = {lang.code for lang in tr.get_installed_languages()}
         if not {src, dst} <= langs:
             print(f"Descargando modelo Argos {src}->{dst} (solo la primera vez)…", file=sys.stderr)
             pkg.update_package_index()
@@ -401,16 +401,16 @@ def write_text(img, items, font_path):
             font = ImageFont.truetype(font_path, size)
             lines = wrap(dr, tr, font, maxw)
             lh = size * 1.2
-            if size <= 8 or (len(lines) * lh <= max(bh * (1.05 if it["nlines"] > 1 else 1.15), lh) and all(dr.textlength(l, font=font) <= maxw * 1.02 for l in lines)):
+            if size <= 8 or (len(lines) * lh <= max(bh * (1.05 if it["nlines"] > 1 else 1.15), lh) and all(dr.textlength(ln, font=font) <= maxw * 1.02 for ln in lines)):
                 break
             size -= 1
         total = len(lines) * lh
         y = y0 + (bh - total) / 2 if single or total < bh else y0
         cx = (x0 + x1) / 2
-        for l in lines:
-            lw = dr.textlength(l, font=font)
+        for ln in lines:
+            lw = dr.textlength(ln, font=font)
             x = cx - lw / 2 if centered else x0
-            dr.text((x, y), l, font=font, fill=it.get("color", (20, 20, 20)))
+            dr.text((x, y), ln, font=font, fill=it.get("color", (20, 20, 20)))
             y += lh
     out = big.resize((W, H), Image.LANCZOS)
     return cv2.cvtColor(np.array(out), cv2.COLOR_RGB2BGR)
