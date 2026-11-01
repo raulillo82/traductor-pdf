@@ -23,8 +23,8 @@ BULLET = re.compile(r"^\s*([•\-–·▪])\s+")
 
 
 def block_info(b):
-    spans = [s for l in b["lines"] for s in l["spans"]]
-    text = " ".join(" ".join(s["text"] for s in l["spans"]).strip() for l in b["lines"])
+    spans = [s for ln in b["lines"] for s in ln["spans"]]
+    text = " ".join(" ".join(s["text"] for s in ln["spans"]).strip() for ln in b["lines"])
     text = re.sub(r"\s+", " ", text.replace("**", "")).strip()
     size = max(s["size"] for s in spans)
     bold = all("bold" in s["font"].lower() for s in spans if s["text"].strip())
@@ -51,8 +51,8 @@ def split_rows(block):
             groups.append([line])
     if len(groups) == 1:
         return [block]
-    return [{**block, "lines": g, "bbox": (min(l["bbox"][0] for l in g), min(l["bbox"][1] for l in g),
-                                           max(l["bbox"][2] for l in g), max(l["bbox"][3] for l in g))}
+    return [{**block, "lines": g, "bbox": (min(ln["bbox"][0] for ln in g), min(ln["bbox"][1] for ln in g),
+                                           max(ln["bbox"][2] for ln in g), max(ln["bbox"][3] for ln in g))}
             for g in groups]
 
 
