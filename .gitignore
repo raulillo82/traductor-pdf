@@ -1,0 +1,21 @@
+# entorno y artefactos
+.venv/
+__pycache__/
+*_work/
+# documentos de prueba y resultados (derechos de terceros / peso)
+*.pdf
+# secretos y configuración local
+.env
+*.key
+*.pem
+secrets/
+data/
+# notas privadas con datos de infraestructura
+TODO.md
+.venv-web/
+
+# PDFs de prueba de terceros y traducciones derivadas
+samples/
+
+# valores de despliegue propios (host SSH, etc.)
+deploy/local.env

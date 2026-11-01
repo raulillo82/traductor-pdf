@@ -1,0 +1,30 @@
+#!/bin/bash
+# Comando forzado para la clave SSH del servidor web (authorized_keys: command=...,restrict).
+# Solo acepta "health" y "translate"; cualquier otra cosa se rechaza.
+set -euo pipefail
+IMAGE="${TRADUCTOR_IMAGE:-localhost/traductor-worker:latest}"
+# Glosario editable sin reconstruir la imagen: si existe, sustituye al de la imagen.
+GLOSS="${TRADUCTOR_GLOSSARY:-$HOME/.config/traductor/glosario.txt}"
+EXTRA=()
+[ -f "$GLOSS" ] && EXTRA=(-v "$GLOSS:/app/glosario_externo.txt:ro,Z" -e GLOSSARY=/app/glosario_externo.txt)
+
+case "${SSH_ORIGINAL_COMMAND:-}" in
+  health)
+    podman image exists "$IMAGE" && echo ok || { echo "imagen no encontrada" >&2; exit 1; }
+    ;;
+  translate)
+    exec 9>"${XDG_RUNTIME_DIR:-/tmp}/traductor.lock"
+    flock -n 9 || { echo "@@ERROR Mordor está ocupado con otro trabajo." >&2; exit 75; }
+    exec timeout 2000 podman run --rm -i \
+      --network none --cap-drop all --security-opt no-new-privileges \
+      --tmpfs /tmp:rw,size=4g,mode=1777 \
+      --pids-limit 1024 \
+      -e HOME=/home/app -e XDG_CACHE_HOME=/tmp \
+      -e MAX_BYTES="${MAX_BYTES:-104857600}" -e MAX_PAGES="${MAX_PAGES:-100}" \
+      "${EXTRA[@]}" "$IMAGE"
+    ;;
+  *)
+    echo "comando no permitido" >&2
+    exit 126
+    ;;
+esac

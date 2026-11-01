@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}{{ t('app.title') }}{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-base="{{ request.script_root }}" data-csrf="{{ csrf_token() }}">
+  <header class="top">
+    <a class="brand" href="{{ url_for('index') }}">{{ t('app.title') }}</a>
+    {% if user %}
+    <nav>
+      {% if user['is_admin'] %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
+      <form method="post" action="{{ url_for('logout') }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="link" type="submit">Salir</button>
+      </form>
+    </nav>
+    {% endif %}
+  </header>
+  <main>{% block body %}{% endblock %}</main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

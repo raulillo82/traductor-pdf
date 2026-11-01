@@ -1,0 +1,25 @@
+[Unit]
+Description=Traductor de patrones (podman)
+After=network-online.target
+
+[Service]
+Type=simple
+# Una Raspberry Pi no tiene RTC: arranca con una fecha antigua hasta que chrony la sincroniza (~20-60 s).
+# Se espera (máx. 2 min) a que el reloj sea razonable; 1790000000 = septiembre de 2026.
+ExecStartPre=/usr/bin/sh -c 'i=0; while [ "$$(date +%%s)" -lt 1790000000 ] && [ $$i -lt 120 ]; do i=$$((i+1)); sleep 1; done'
+ExecStartPre=-/usr/bin/podman rm -f traductor
+ExecStart=/usr/bin/podman run --name traductor --rm \
+    -p 127.0.0.1:5002:5002 \
+    --userns keep-id:uid=1000,gid=1000 \
+    --cap-drop all --security-opt no-new-privileges \
+    --read-only --tmpfs /tmp -e HOME=/tmp \
+    --env-file %h/traductor/traductor.env \
+    -v %h/traductor/data:/data:Z \
+    -v %h/traductor/secrets:/secrets:ro,Z \
+    localhost/traductor-web:latest
+ExecStop=/usr/bin/podman stop -t 10 traductor
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

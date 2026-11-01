@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block body %}
+<div id="status" class="banner" hidden></div>
+
+<section class="card">
+  <h1>Traducir un PDF</h1>
+  <p class="muted">Del inglés al español. Máximo {{ max_mb }} MB.</p>
+  <form id="upload-form">
+    <input id="file" type="file" accept="application/pdf,.pdf" hidden>
+    <button type="button" id="pick" class="btn big">Elegir PDF</button>
+    <p id="chosen" class="muted" aria-live="polite"></p>
+    <button type="submit" id="go" class="btn primary big" disabled>Traducir</button>
+  </form>
+  <p id="error" class="notice error" role="alert" hidden></p>
+</section>
+
+<section id="progress-card" class="card" hidden>
+  <h2 id="p-name"></h2>
+  <progress id="bar" max="100" value="0"></progress>
+  <p id="p-text" aria-live="polite"></p>
+  <p id="p-hint" class="muted">Puedes cerrar esta pestaña o dejar el navegador en segundo plano. Si aceptas las notificaciones, te avisaremos al terminar.</p>
+  <div id="p-actions" class="actions" hidden>
+    <a id="p-view" class="btn primary big" target="_blank" rel="noopener">Ver</a>
+    <a id="p-download" class="btn big">Descargar</a>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Mis traducciones</h2>
+  <p class="muted">Se borran solas a los {{ retention }}.</p>
+  <ul id="jobs" class="jobs"></ul>
+  <p id="jobs-empty" class="muted">Todavía no has traducido nada. Las traducciones se guardan {{ retention }}.</p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='app.js') }}" defer></script>{% endblock %}

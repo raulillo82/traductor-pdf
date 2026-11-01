@@ -1,0 +1,312 @@
+# Términos completos EN -> ES (se traducen). Las siglas se dejan tal cual (X = X).
+magic ring = anillo mágico
+magic circle = anillo mágico
+slip stitch = punto deslizado
+single crochet = punto bajo
+half double crochet = media vareta
+double crochet = vareta
+chain = cadena
+increase = aumento
+decrease = disminución
+plastic canvas = rejilla de plástico
+flatten = aplana
+re:\bStitch or glue = Coser o pegar
+# "round" solo es "vuelta" cuando va con número ("Round 3", "Rounds 2-5"); como adjetivo lo traduce el motor
+re:\bRounds (\d+(?:\s*[-–]\s*\d+)?) = Vueltas \1
+re:\bRound (\d+) = Vuelta \1
+stuff = rellenar
+stuffing = relleno
+yarn = hilo
+fasten off = rematar
+back loop only = solo lazada trasera
+front loop only = solo lazada delantera
+# Siglas: se conservan
+MR = MR
+SC = SC
+SL ST = SL ST
+HDC = HDC
+DC = DC
+INC = INC
+DEC = DEC
+CH = CH
+FO = FO
+BLO = BLO
+FLO = FLO
+RND = RND
+ST = ST
+STS = STS
+ST(S) = ST(S)
+# Verbos y frases típicas
+turn = girar
+across = hasta el final
+work even = trabajar sin variar
+sew = coser
+embroider = bordar
+side gusset = pieza lateral
+tail = hebra
+repeat = repetir
+
+# ===== Frases fijas y términos que el motor traduce MAL (antes de traducir) =====
+# Solo frases completas o términos masculinos: un marcador en un sustantivo femenino rompe el artículo
+# ("el puerta") y con demasiados marcadores el motor deja la frase en inglés.
+his page shows = Esta página muestra
+this page shows = Esta página muestra
+how to crochet = cómo tejer a ganchillo
+re:\bin (?:the )?(\d+)(?:st|nd|rd|th) ch from hook = en la \1.ª cadena desde el gancho
+re:\b(\d+)(?:st|nd|rd|th) ch from hook = \1.ª cadena desde el gancho
+re:\bKeep your stitches tight and even = Mantener los puntos apretados y uniformes
+keep your stitches tight = mantener los puntos apretados
+re:\bweave in (?:the |all )?(?:yarn )?ends? = esconder los cabos
+re:\b(?:the) long tail = la hebra larga
+re:\b(?:a )?long tail = una hebra larga
+re:\bsame as project = igual que en el proyecto
+re:\bClose-?Up View = Vista de detalle
+leg construction = construcción de las patas
+post construction = construcción de los postes
+tail tuft = mechón de la cola
+snow trim = ribete de nieve
+smoke puff = bocanada de humo
+tree topper = adorno para la copa del árbol
+star topper = estrella para la copa
+snow cap = caperuza de nieve
+wreath and bow = corona y lazo
+red bow = lazo rojo
+tuft = mechón
+# "strands" son HEBRAS, no cadenas ni hilos
+a few strands of yarn = unas cuantas hebras de hilo
+short yarn strands = hebras cortas de hilo
+using more strands = usando más hebras
+trim the strands = recorta las hebras
+trim the ends = recorta los extremos
+the strands = las hebras
+each strand = cada hebra
+make it fluffier = hacerlo más esponjoso
+yarn strands = hebras de hilo
+make the mane fluffier = hacer la crin más esponjosa
+between the ears = entre las orejas
+muzzle = hocico
+pom-poms = pompones
+pom-pom = pompón
+# Siglas que se conservan (plurales y variantes)
+Rnds = Rnds
+sc2tog = sc2tog
+dc2tog = dc2tog
+hdc2tog = hdc2tog
+REP = REP
+
+# ===== Palabras que el motor suele DEJAR en inglés (se corrigen después de traducir) =====
+# Guía de diagramas: títulos, pies de dibujo y frases completas que el motor traduce mal.
+# Frases enteras (nunca sustantivos sueltos, ver docs/glosario.md).
+Step-by-Step Diagram Guide = guía de diagramas paso a paso
+Companion to the written pattern = complemento del patrón escrito
+stitch-count diagram = diagrama del número de puntos
+top view (growth rounds) = vista superior (vueltas de aumento)
+worsted yarn = hilo worsted
+treble crochet = vareta triple
+invisible sc decrease = disminución invisible
+Cream ribbed awning = toldo acanalado crema
+as worked = tal como se trabaja
+ribs run vertically when sewn = las acanaladuras quedan en vertical al coser
+scalloped edge = borde festoneado
+Green Display Base and Snow = base verde de exhibición y nieve
+Display base: top-down placement guide = base de exhibición: guía de colocación vista desde arriba
+FRONT of display = frente de la exhibición
+Red Mitten Workshop Body = cuerpo de la manopla roja
+Cream lower cuff band = banda inferior del puño, en crema
+Joining the mitten body = unión del cuerpo de la manopla
+Pin gusset around panel A = sujeta con alfileres la pieza lateral alrededor del panel A
+Attach panel B to the = une el panel B al
+open gusset edge = borde abierto de la pieza lateral
+whipstitch bottom shut = cierra la base con punto de sobrehilado
+hinges (black, left) = bisagras (negras, izquierda)
+knob (right) = pomo (derecha)
+Reindeer body, muzzle, ears, antlers = cuerpo, hocico, orejas y astas del reno
+antler: slip-stitch branches = asta: ramas en punto deslizado
+Reindeer ear (same shape for fox ear, adjust dc count) = oreja de reno (misma forma para la oreja de zorro, ajusta el número de dc)
+Fox ear and gift box = oreja de zorro y caja de regalo
+Fox body and tail = cuerpo y cola de zorro
+Golden bell = campana dorada
+Blue bell = campana azul
+Hanging pieces: blue bell and tan sock = piezas colgantes: campana azul y calcetín beige
+Holly leaf = hoja de acebo
+Red berries = bayas rojas
+Mini stockings on the front = mini calcetines navideños en la parte delantera
+Mini mittens = mini manoplas
+Yarn wagon = carrito de hilo
+Yarn balls = ovillos
+Round yarn basket = cesta redonda de ovillos
+Small red bowl with yarn = cuenco rojo pequeño con hilo
+Pine Trees and Gray Stones = pinos y piedras grises
+Large rock = roca grande
+Flat path stone = piedra plana del camino
+Final Assembly Diagrams = diagramas de montaje final
+Assembly order = orden de montaje
+re:\bC\. Decorations: Bells, Holly, Mistletoe, Lights, Stockings, Sign = C. Decoraciones: campanas, acebo, muérdago, luces, calcetines navideños, cartel
+re:"Warm Gifts" sign = Cartel "Warm Gifts"
+re:\bMake (\d+) squares = Hacer \1 cuadrados
+re:\boval = chain, bar height = stitch type \(sl st<sc<hdc<dc\) = óvalo: cadena; altura de la barra: tipo de punto (sl st<sc<hdc<dc)
+re:\btop side: first pass \| bottom side: way back = lado superior: ida | lado inferior: vuelta
+re:\bin 2nd ch and across = en la 2.ª cadena y hasta el final
+re:\bThumb about (\S+) in tall x (\S+) in wide = Pulgar de unas \1 pulgadas de alto x \2 de ancho
+re:\bBody about (\S+) in tall x (\S+) in wide = Cuerpo de unas \1 pulgadas de alto x \2 de ancho
+re:\bFoundation: = Cadeneta base:
+re:\bHinges: = Bisagras:
+re:\bPlanks: = Tablones:
+re:\bKnob: = Pomo:
+re:\bBorder(?=:|\sRnd) = Borde
+# "antlers" son ASTAS (femenino). Frases con el artículo dentro: una entrada suelta deja "los astas"/"hormigueros".
+the antlers = las astas
+two antlers = dos astas
+antlers and ears = astas y orejas
+ears and antlers = orejas y astas
+antlers and scarf = astas y bufanda
+antler base = base de las astas
+the antler stem = el tallo del asta
+middle of antler = mitad del asta
+the reindeer’s antlers and ears = las astas y las orejas del reno
+the reindeer's antlers and ears = las astas y las orejas del reno
+the reindeer’s antlers = las astas del reno
+the reindeer's antlers = las astas del reno
+details, antlers = detalles, astas
+for antlers = para astas
+
+# "tan" es un color en inglés (marrón claro de cuero): beige/camel. Frases con el sustantivo (el color va detrás en español)
+# y, suelto, solo cuando va seguido de coma, dos puntos, punto o paréntesis ("(tan)", "with tan:", "cream, tan, brown").
+# solo los femeninos llevan el artículo dentro; con los masculinos queda "de el marco" en vez de "del marco"
+the tan strips = las tiras beige/camel
+the tan window = la ventana beige/camel
+the round tan window = la ventana redonda beige/camel
+tan yarn wagon = carrito de hilo beige/camel
+tan sock = calcetín beige/camel
+tan frame = marco beige/camel
+tan strips = tiras beige/camel
+tan window = ventana beige/camel
+round tan window = ventana redonda beige/camel
+tan thread = hilo beige/camel
+tan yarn = hilo beige/camel
+re:\btan(?=[,:.)]) = beige/camel
+[después]
+# Colores
+light brown = marrón claro
+dark brown = marrón oscuro
+darker brown = marrón más oscuro
+golden brown = marrón dorado
+warm cream = crema cálido
+dark green = verde oscuro
+light green = verde claro
+brown = marrón
+cream = crema
+green = verde
+white = blanco
+gold = dorado
+golden = dorado
+gray = gris
+grey = gris
+black = negro
+pink = rosa
+orange = naranja
+yellow = amarillo
+# Piezas y partes
+front wall = pared frontal
+back wall = pared trasera
+side walls = paredes laterales
+side wall = pared lateral
+walls = paredes
+wall = pared
+roof trim = ribete del tejado
+roof = tejado
+chimney = chimenea
+windows = ventanas
+window = ventana
+door = puerta
+fence = valla
+posts = postes
+post = poste
+frame = marco
+thumb tube = tubo del pulgar
+thumb = pulgar
+legs = patas
+leg = pata
+ears = orejas
+ear = oreja
+tail = cola
+mane = crin
+hooves = pezuñas
+hoof = pezuña
+snout = hocico
+antlers = astas
+antler = asta
+cheeks = mejillas
+cheek = mejilla
+scarf = bufanda
+hat = gorro
+mittens = manoplas
+mitten = manopla
+# Navidad
+reindeer = reno
+sleigh = trineo
+wreath = corona
+bow = lazo
+garland = guirnalda
+baubles = bolas
+bauble = bola
+ornament = adorno
+holly = acebo
+berries = bayas
+berry = baya
+stocking = calcetín navideño
+snowman = muñeco de nieve
+puffy = esponjoso
+edging = ribete
+trim = ribete
+snow = nieve
+# Materiales
+yarn needle = aguja lanera
+tapestry needle = aguja lanera
+needle = aguja
+pins = alfileres
+pin = alfiler
+stitch markers = marcadores de punto
+stitch marker = marcador de punto
+safety eyes = ojos de seguridad
+scissors = tijeras
+fiberfill = relleno de fibra
+re:\bRed(?=\s+(?:stocking|yarn|house|scarf|bow|ornament|berries|berry|bauble|baubles|pins|panel|panels|hat|mitten|sleigh)\b) = Rojo
+# Color + hilo: el motor los deja en orden inglés ('Brown Yarn' -> 'Marrón Hilo')
+brown yarn = hilo marrón
+light brown yarn = hilo marrón claro
+dark brown yarn = hilo marrón oscuro
+golden brown yarn = hilo marrón dorado
+white yarn = hilo blanco
+green yarn = hilo verde
+red yarn = hilo rojo
+cream yarn = hilo crema
+pink yarn = hilo rosa
+gray yarn = hilo gris
+grey yarn = hilo gris
+black yarn = hilo negro
+orange yarn = hilo naranja
+yellow yarn = hilo amarillo
+gold yarn = hilo dorado
+garland trim = ribete de guirnalda
+re:\blos (?:pequeños )?baubles? = las bolas
+fluffier = más esponjoso
+fluffy = esponjoso
+# Verbos sueltos que se quedan sin traducir en etiquetas ("Make 2", "Switch to light brown")
+re:\bMake (\d+) = Hacer \1
+re:\bafter (RD|Rnd|Round) (\d+) = tras la vuelta \2
+re:\bswitch to = cambiar a
+re:\bFront View = Vista frontal
+re:\bBack View = Vista trasera
+
+# Guía de diagramas: palabras sueltas que el motor deja en inglés o traduce con otro sentido
+Row = Fila
+Rows = Filas
+around = alrededor
+across = hasta el final
+Stuff = Rellenar
+Snowflakes = Copos de nieve
+Stockings = Calcetines navideños
+Fox = Zorro
+calcetín bronceado = calcetín beige
+Cuff = Puño

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ t('app.title') }}{% endblock %}
+{% block body %}
+<section class="card">
+  <h1>Registro de nuevos usuarios</h1>
+  <p>Ahora mismo está <strong>{{ 'abierto' if registration else 'cerrado' }}</strong>.</p>
+  <form method="post" action="{{ url_for('admin_registration') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="open" value="{{ '0' if registration else '1' }}">
+    <button class="btn {{ '' if registration else 'primary' }}" type="submit">{{ 'Cerrar registro' if registration else 'Abrir registro' }}</button>
+  </form>
+</section>
+<section class="card">
+  <h2>Usuarios</h2>
+  <ul class="users">
+  {% for u in users %}
+    <li>
+      <div><strong>{{ u['name'] or u['email'] }}</strong><br><span class="muted">{{ u['email'] }} · {{ u['njobs'] }} traducciones</span></div>
+      <div class="actions">
+        <span class="tag {{ u['status'] }}">{{ {'pending':'Pendiente','approved':'Aprobado','blocked':'Bloqueado'}[u['status']] }}{{ ' · admin' if u['is_admin'] }}</span>
+        {% if not u['is_admin'] %}
+        {% for act, label in (('approve','Aprobar'),('block','Bloquear'),('delete','Borrar')) %}
+          {% if not (act == 'approve' and u['status'] == 'approved') and not (act == 'block' and u['status'] == 'blocked') %}
+          <form method="post" action="{{ url_for('admin_user', uid=u['id'], action=act) }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <button class="btn small" type="submit">{{ label }}</button>
+          </form>
+          {% endif %}
+        {% endfor %}
+        {% endif %}
+      </div>
+    </li>
+  {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block body %}
+<section class="card center">
+  <h1>{{ t('app.title') }}</h1>
+  <p>{{ t('login.intro') }}</p>
+  {% if message %}<p class="notice">{{ message }}</p>{% endif %}
+  <a class="btn primary big" href="{{ url_for('auth_google') }}">{{ t('login.google') }}</a>
+  {% if closed and not message %}<p class="muted">{{ t('login.closed') }}</p>{% endif %}
+</section>
+{% endblock %}
