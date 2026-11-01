@@ -1,0 +1,8 @@
+[Unit]
+Description=Actualiza la imagen del worker del traductor si main ha cambiado
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/traductor-worker-deploy.sh

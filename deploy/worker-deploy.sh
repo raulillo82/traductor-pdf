@@ -1,0 +1,91 @@
+#!/bin/bash
+# Actualiza la imagen del worker desde la propia máquina del worker, siguiendo origin/main.
+#
+# Lo lanza un temporizador de systemd (el worker es un portátil: si estaba apagado o sin red, se
+# pone al día cuando vuelve). Solo LEE el repositorio público, así que nada de fuera puede
+# hacer que ejecute algo. main solo recibe código por pull request con los tests en verde.
+#
+# Reconstruye solo si cambian worker/, translate_pdf*.py, el glosario o requirements.txt. La imagen
+# nueva se construye con la etiqueta "candidate" y se PRUEBA (importaciones y una traducción de
+# verdad, sin red) antes de pasar a "latest"; si falla, producción no se toca. La anterior queda como
+# "previous" para volver atrás a mano. Un commit que falla se reintenta MAX_ATTEMPTS veces.
+#
+# Se instala FUERA del repositorio, para que un commit no pueda cambiarlo. Tampoco instala
+# traductor-ssh (el comando SSH forzado, que es la frontera de seguridad de la clave de la web):
+# si el del repo difiere del instalado, solo avisa; hay que copiarlo a mano tras revisarlo.
+set -uo pipefail
+
+REPO=${REPO:-$HOME/.local/share/traductor-worker/repo}
+STATE=${STATE:-$HOME/.local/state/traductor-worker-deploy}
+IMAGE=${IMAGE:-localhost/traductor-worker}
+FORCED=${FORCED:-$HOME/.local/bin/traductor-ssh}
+MAX_ATTEMPTS=${MAX_ATTEMPTS:-3}
+WATCHED=(worker translate_pdf.py translate_pdf_text.py glosario_ganchillo_es.txt requirements.txt)
+
+log() { echo "[traductor-worker-deploy] $1"; }
+RUN=(podman run --rm --network none --cap-drop all --security-opt no-new-privileges)
+
+# Prueba la imagen candidata sin red: dependencias y una traducción de punta a punta
+smoke_test() {
+    local img=$1 pdf out
+    pdf=$(mktemp) out=$(mktemp)
+    trap 'rm -f "$pdf" "$out"' RETURN
+    "${RUN[@]}" --entrypoint python "$img" -c '
+import sys, pymupdf, cv2, PIL, pytesseract, argostranslate.translate
+doc = pymupdf.open(); page = doc.new_page()
+page.insert_text((72, 72), "Single crochet in the next stitch. Then chain two and slip stitch to join the round.\n"
+                           "Fasten off and weave in the ends. Stuff the piece firmly before closing it.")
+sys.stdout.buffer.write(doc.tobytes())
+' > "$pdf" || return 1
+    "${RUN[@]}" -i --tmpfs /tmp:rw,size=1g,mode=1777 -e HOME=/home/app -e XDG_CACHE_HOME=/tmp "$img" < "$pdf" > "$out" 2>/dev/null || return 1
+    # El resultado debe ser un PDF con texto traducido (aparece una palabra española del glosario)
+    "${RUN[@]}" -i --entrypoint python "$img" -c '
+import sys, pymupdf
+text = " ".join(p.get_text() for p in pymupdf.open(stream=sys.stdin.buffer.read(), filetype="pdf")).lower()
+sys.exit(0 if any(w in text for w in ("punto", "cadena", "cabos", "rellen")) else 1)
+' < "$out"
+}
+
+mkdir -p "$STATE"
+git -C "$REPO" fetch --quiet origin main || { log "sin red o repositorio no accesible: se reintenta más tarde"; exit 0; }
+target=$(git -C "$REPO" rev-parse FETCH_HEAD)
+[ -f "$STATE/deployed" ] || git -C "$REPO" rev-parse HEAD > "$STATE/deployed"
+deployed=$(cat "$STATE/deployed")
+[ "$deployed" = "$target" ] && exit 0
+
+attempts=0
+if [ -f "$STATE/failed" ] && [ "$(cut -d' ' -f1 "$STATE/failed")" = "$target" ]; then
+    attempts=$(cut -d' ' -f2 "$STATE/failed")
+fi
+[ "$attempts" -ge "$MAX_ATTEMPTS" ] && exit 0
+
+git -C "$REPO" merge --quiet --ff-only "$target" || { log "no se puede avanzar (fast-forward)"; exit 1; }
+
+# El comando forzado no se instala solo: se avisa una vez por commit si difiere del instalado
+if [ -f "$FORCED" ] && ! diff -q -I '^#' "$FORCED" "$REPO/worker/traductor-ssh" > /dev/null; then
+    log "AVISO: worker/traductor-ssh del repo difiere del instalado en $FORCED: revísalo y cópialo a mano"
+fi
+
+if ! git -C "$REPO" diff --quiet "$deployed" "$target" -- "${WATCHED[@]}"; then
+    log "construyendo $target, intento $((attempts + 1)) de $MAX_ATTEMPTS"
+    if nice -n 19 ionice -c3 podman build -q -f "$REPO/worker/Dockerfile" -t "$IMAGE:candidate" "$REPO" > /dev/null \
+            && smoke_test "$IMAGE:candidate"; then
+        old_previous=$(podman image inspect -f '{{.Id}}' "$IMAGE:previous" 2> /dev/null || true)
+        podman tag "$IMAGE:latest" "$IMAGE:previous" && podman tag "$IMAGE:candidate" "$IMAGE:latest" || exit 1
+        podman untag "$IMAGE:candidate"
+        # Solo se borra la imagen que acaba de dejar de ser "previous"; hay otras imágenes ajenas en la máquina
+        for keep in latest previous; do
+            [ "$old_previous" = "$(podman image inspect -f '{{.Id}}' "$IMAGE:$keep")" ] && old_previous=
+        done
+        [ -n "$old_previous" ] && podman rmi "$old_previous" > /dev/null 2>&1
+    else
+        echo "$target $((attempts + 1))" > "$STATE/failed"
+        log "FALLO al construir o probar la imagen candidata: producción no se ha tocado"
+        podman rmi "$IMAGE:candidate" > /dev/null 2>&1
+        exit 1
+    fi
+fi
+
+echo "$target" > "$STATE/deployed"
+rm -f "$STATE/failed"
+log "desplegado $target"
