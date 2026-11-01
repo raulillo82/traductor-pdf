@@ -64,6 +64,40 @@ promote_candidate() {
     return 0
 }
 
+# ¿Hay conexión con lo que necesita un build (registro de imágenes, PyPI y GitHub)? curl sin -f devuelve 0 aunque
+# la respuesta sea un 401: solo falla si no hay conexión.
+ONLINE_URLS=${ONLINE_URLS:-"https://registry-1.docker.io/v2/ https://pypi.org/simple/ https://raw.githubusercontent.com/"}
+online() {
+    local url
+    for url in $ONLINE_URLS; do
+        curl -s -m 8 -o /dev/null "$url" || return 1
+    done
+}
+
+# Un build o una prueba fallidos solo cuentan como intento si ahora hay red. Sin red, la causa más probable es el
+# portátil (wifi caída, cambio de red) y no el código; contarlo agotaría los intentos sin que el commit tenga culpa.
+# Un fallo del código con red sí cuenta, así que sigue parándose en MAX_ATTEMPTS: nunca reintenta indefinidamente.
+# Devuelve 1 si el fallo cuenta como intento y 0 si no.
+record_failure() {
+    local target=$1 attempts=$2
+    podman rmi "$IMAGE:candidate" > /dev/null 2>&1
+    if online; then
+        echo "$target $((attempts + 1))" > "$STATE/failed"
+        log "FALLO al construir o probar la imagen candidata: producción no se ha tocado"
+        return 1
+    fi
+    log "FALLO sin conexión de red: no cuenta como intento, se reintenta cuando vuelva"
+    return 0
+}
+
+# Al agotar los intentos el script se queda quieto; se avisa una sola vez por commit (no cada media hora)
+exhausted_notice() {
+    local target=$1
+    [ "$(cat "$STATE/notified" 2> /dev/null)" = "$target" ] && return 0
+    echo "$target" > "$STATE/notified"
+    log "AVISO: $target agotó $MAX_ATTEMPTS intentos y no se reintentará hasta que llegue otro commit; para forzarlo: rm $STATE/failed"
+}
+
 mkdir -p "$STATE"
 git -C "$REPO" fetch --quiet origin main || { log "sin red o repositorio no accesible: se reintenta más tarde"; exit 0; }
 target=$(git -C "$REPO" rev-parse FETCH_HEAD)
@@ -75,7 +109,10 @@ attempts=0
 if [ -f "$STATE/failed" ] && [ "$(cut -d' ' -f1 "$STATE/failed")" = "$target" ]; then
     attempts=$(cut -d' ' -f2 "$STATE/failed")
 fi
-[ "$attempts" -ge "$MAX_ATTEMPTS" ] && exit 0
+if [ "$attempts" -ge "$MAX_ATTEMPTS" ]; then
+    exhausted_notice "$target"
+    exit 0
+fi
 
 git -C "$REPO" merge --quiet --ff-only "$target" || { log "no se puede avanzar (fast-forward)"; exit 1; }
 
@@ -90,10 +127,8 @@ if ! git -C "$REPO" diff --quiet "$deployed" "$target" -- "${WATCHED[@]}"; then
             && smoke_test "$IMAGE:candidate"; then
         promote_candidate || { log "FALLO al cambiar las etiquetas: revisa 'podman images'"; exit 1; }
     else
-        echo "$target $((attempts + 1))" > "$STATE/failed"
-        log "FALLO al construir o probar la imagen candidata: producción no se ha tocado"
-        podman rmi "$IMAGE:candidate" > /dev/null 2>&1
-        exit 1
+        record_failure "$target" "$attempts"
+        exit $?
     fi
 fi
 
