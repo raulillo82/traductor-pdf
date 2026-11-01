@@ -10,7 +10,7 @@ móvil ──HTTPS──▶ nginx ──▶ contenedor "traductor-web" ──ssh
 ## Worker (máquina potente)
 
 ```
-podman build -f worker/Containerfile -t traductor-worker .
+podman build -f worker/Dockerfile -t traductor-worker .
 install -m 755 worker/traductor-ssh ~/.local/bin/traductor-ssh
 ```
 
@@ -71,3 +71,23 @@ La app confía en las cabeceras `X-Forwarded-*`: el puerto 5002 debe escuchar so
 - `ADMIN_EMAILS`: administradores (aprobados siempre, ven `/admin`).
 - `PRE_APPROVED_EMAILS`: cuentas aprobadas de antemano, entran aunque el registro esté cerrado.
 - El registro de nuevas cuentas se abre y cierra desde `/admin`. Cerrado por defecto.
+
+## Despliegue automático de la web
+
+Como alternativa a `deploy/deploy.sh` (que empuja el código desde tu máquina), el propio servidor puede seguir
+`main` con un temporizador, sin runner de Actions ni credenciales (el repositorio es público):
+
+```
+git clone https://github.com/raulillo82/traductor-pdf.git ~/traductor/repo
+install -m 755 ~/traductor/repo/deploy/traductor-deploy.sh ~/.local/bin/
+install -m 644 ~/traductor/repo/deploy/traductor-deploy.{service,timer} ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now traductor-deploy.timer
+```
+
+Cada 5 minutos mira `origin/main`. Si ha cambiado `webapp/` o el unit del servicio, reconstruye la imagen y
+reinicia; si la web no responde en `/healthz`, vuelve a la imagen anterior (`traductor-web:previous`). Un commit
+que falla se reintenta 3 veces y se deja hasta que llegue otro. Si hay una traducción en curso o en cola, aplaza
+el reinicio al siguiente aviso. Estado en `~/.local/state/traductor-deploy/`.
+
+El script se instala **fuera del repositorio** a propósito: un commit no puede cambiarlo; para actualizarlo,
+vuelve a copiarlo a mano. No toca el worker ni `traductor-ssh`.

@@ -1,14 +1,20 @@
 version: 2
 updates:
+  # "/" ya recorre también webapp/requirements*.txt: una entrada /webapp solo duplicaría las PR
   - package-ecosystem: pip
     directory: /
-    schedule:
-      interval: weekly
-  - package-ecosystem: pip
-    directory: /webapp
     schedule:
       interval: weekly
   - package-ecosystem: github-actions
     directory: /
+    schedule:
+      interval: weekly
+  # Dependabot solo reconoce los ficheros llamados Dockerfile (podman los construye igual con -f)
+  - package-ecosystem: docker
+    directory: /webapp
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /worker
     schedule:
       interval: weekly
