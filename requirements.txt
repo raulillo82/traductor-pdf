@@ -4,4 +4,4 @@ opencv-python-headless==5.0.0.93
 pillow==13.0.0
 pymupdf==2.0
 pytesseract==0.3.13
-reportlab==5.0.1
+reportlab==5.1.0
