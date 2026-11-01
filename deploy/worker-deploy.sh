@@ -46,6 +46,24 @@ sys.exit(0 if any(w in text for w in ("punto", "cadena", "cabos", "rellen")) els
 ' < "$out"
 }
 
+# candidate -> latest -> previous. Cuidado: `podman untag IMAGEN` sin nombre quita TODAS las etiquetas de la
+# imagen (incluida latest); por eso se pasa siempre el nombre exacto, y al final se comprueba que latest existe.
+promote_candidate() {
+    local new_id old_previous keep
+    new_id=$(podman image inspect -f '{{.Id}}' "$IMAGE:candidate") || return 1
+    old_previous=$(podman image inspect -f '{{.Id}}' "$IMAGE:previous" 2> /dev/null || true)
+    podman image exists "$IMAGE:latest" && { podman tag "$IMAGE:latest" "$IMAGE:previous" || return 1; }
+    podman tag "$new_id" "$IMAGE:latest" || return 1
+    podman untag "$IMAGE:candidate" "$IMAGE:candidate" || true
+    [ "$(podman image inspect -f '{{.Id}}' "$IMAGE:latest" 2> /dev/null)" = "$new_id" ] || return 1
+    # Solo se borra la imagen que deja de ser "previous"; hay otras imágenes ajenas en la máquina
+    for keep in latest previous; do
+        [ "$old_previous" = "$(podman image inspect -f '{{.Id}}' "$IMAGE:$keep" 2> /dev/null)" ] && old_previous=
+    done
+    [ -n "$old_previous" ] && podman rmi "$old_previous" > /dev/null 2>&1
+    return 0
+}
+
 mkdir -p "$STATE"
 git -C "$REPO" fetch --quiet origin main || { log "sin red o repositorio no accesible: se reintenta más tarde"; exit 0; }
 target=$(git -C "$REPO" rev-parse FETCH_HEAD)
@@ -70,14 +88,7 @@ if ! git -C "$REPO" diff --quiet "$deployed" "$target" -- "${WATCHED[@]}"; then
     log "construyendo $target, intento $((attempts + 1)) de $MAX_ATTEMPTS"
     if nice -n 19 ionice -c3 podman build -q -f "$REPO/worker/Dockerfile" -t "$IMAGE:candidate" "$REPO" > /dev/null \
             && smoke_test "$IMAGE:candidate"; then
-        old_previous=$(podman image inspect -f '{{.Id}}' "$IMAGE:previous" 2> /dev/null || true)
-        podman tag "$IMAGE:latest" "$IMAGE:previous" && podman tag "$IMAGE:candidate" "$IMAGE:latest" || exit 1
-        podman untag "$IMAGE:candidate"
-        # Solo se borra la imagen que acaba de dejar de ser "previous"; hay otras imágenes ajenas en la máquina
-        for keep in latest previous; do
-            [ "$old_previous" = "$(podman image inspect -f '{{.Id}}' "$IMAGE:$keep")" ] && old_previous=
-        done
-        [ -n "$old_previous" ] && podman rmi "$old_previous" > /dev/null 2>&1
+        promote_candidate || { log "FALLO al cambiar las etiquetas: revisa 'podman images'"; exit 1; }
     else
         echo "$target $((attempts + 1))" > "$STATE/failed"
         log "FALLO al construir o probar la imagen candidata: producción no se ha tocado"
